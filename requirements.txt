@@ -1,3 +1,4 @@
+nltk
 streamlit
 matplotlib
 seaborn
@@ -5,4 +6,3 @@ plotly
 textblob
 urlextract
 wordcloud
-nltk
