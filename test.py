@@ -7,6 +7,8 @@ import plotly.express as px
 from wordcloud import WordCloud
 from textblob import TextBlob
 import io
+from nltk.corpus import stopwords
+stop_words = set(stopwords.words('english'))
 
 # App title and sidebar
 st.sidebar.title("WhatsApp Chat Analyzer")
