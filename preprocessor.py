@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from datetime import datetime
+import nltk
 
 def preprocess(data):
     # Pattern to match date and time in the WhatsApp chat format
