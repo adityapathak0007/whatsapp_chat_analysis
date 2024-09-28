@@ -50,7 +50,7 @@ The app requires the WhatsApp chat data to be in `.txt` format. You can export t
 
 You can view the live WhatsApp Chat Analysis app by clicking on the link below:
 
-[View WhatsApp Chat Analysis](https://whatsappchatanalysis-apzgmasfh2vbmhjztkhhfx.streamlit.app/)
+[View WhatsApp Chat Analysis](https://whatsappchatanalysis-5fdc65fn64oswe8ph3odpy.streamlit.app/)
 
 ## Contact
 
