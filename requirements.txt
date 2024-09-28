@@ -1,8 +1,10 @@
-nltk
 streamlit
+pandas
+nltk
+wordcloud
+emoji
 matplotlib
 seaborn
 plotly
 textblob
 urlextract
-wordcloud
