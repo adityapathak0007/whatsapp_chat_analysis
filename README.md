@@ -1,6 +1,6 @@
 # WhatsApp Chat Analysis 📱
 
-[View WhatsApp Chat Analysis](https://whatsappchatanalysis-apzgmasfh2vbmhjztkhhfx.streamlit.app/)
+[View WhatsApp Chat Analysis](https://whatsappchatanalysis-apzgmasfh2vbmhjztkhhfx.streamlit.app)
 
 ## Overview
 
