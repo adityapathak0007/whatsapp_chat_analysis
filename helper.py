@@ -7,6 +7,19 @@ stop_words = set(stopwords.words('english'))
 import pandas as pd
 from collections import Counter
 import emoji
+import streamlit as st
+import preprocessor
+import helper
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from wordcloud import WordCloud
+from textblob import TextBlob
+import io
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
 def fetch_stats(selected_user, df):
 
