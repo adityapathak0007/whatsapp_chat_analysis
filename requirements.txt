@@ -5,3 +5,4 @@ plotly
 textblob
 urlextract
 wordcloud
+nltk
