@@ -7,6 +7,7 @@ import plotly.express as px
 from wordcloud import WordCloud
 from textblob import TextBlob
 import io
+import nltk
 from nltk.corpus import stopwords
 nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
