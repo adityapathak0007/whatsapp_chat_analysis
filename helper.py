@@ -74,7 +74,7 @@ def create_wordcloud(selected_user, df):
                 words.append(word)
 
     # Set the font path to a Devanagari-compatible font (replace with the correct path)
-    font_path = 'https://github.com/adityapathak0007/whatsapp_chat_analysis/blob/main/Nirmala.ttf'  # Example for Windows with 'Nirmala UI' font
+    font_path = 'Nirmala.ttf'  # Example for Windows with 'Nirmala UI' font
 
     # Create a word cloud object
     wc = WordCloud(
