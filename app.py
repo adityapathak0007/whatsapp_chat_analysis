@@ -3,155 +3,161 @@ import preprocessor
 import helper
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
+from wordcloud import WordCloud
+from textblob import TextBlob
+import io
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
 
+# App title and sidebar
+st.sidebar.title("WhatsApp Chat Analyzer")
+uploaded_file = st.sidebar.file_uploader("Choose a WhatsApp Chat File")
 
-st.sidebar.title("What's App Chat Analyzer")
-uploaded_file = st.sidebar.file_uploader("Choose a File")
+# Load and preprocess data
 if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
     data = bytes_data.decode("utf-8")
     df = preprocessor.preprocess(data)
     df['user'] = df['user'].str.strip()
 
-    #st.dataframe(df)
-
-
-    #fetch unique users
+    # Fetch unique users
     user_list = df['user'].unique().tolist()
-
-    # Safely remove 'group_notification' if it exists in the list
     if 'group_notification' in user_list:
         user_list.remove('group_notification')
-
     user_list.sort()
     user_list.insert(0, "Overall")
 
-    selected_user = st.sidebar.selectbox("Show analysis wrt", user_list)
+    selected_user = st.sidebar.selectbox("Analyze Chat By", user_list)
 
     if st.sidebar.button("Show Analysis"):
+        # Show top statistics
         num_messages, words, num_media_messages, num_links = helper.fetch_stats(selected_user, df)
-        st.title("Top Statistics")
+        st.title("Top Chat Statistics")
         col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Total Messages", num_messages)
+        col2.metric("Total Words", words)
+        col3.metric("Media Shared", num_media_messages)
+        col4.metric("Links Shared", num_links)
 
-        with col1:
-            st.header("Total Messages")
-            st.title(num_messages)
-        with col2:
-            st.header("Total Words")
-            st.title(words)
-        with col3:
-            st.header("Media Shared")
-            st.title(num_media_messages)
-        with col4:
-            st.header("Links Shared")
-            st.title(num_links)
-
-        #monthly timeline
-        st.title("Monthly Timeline")
+        # Monthly timeline with Plotly
+        st.title("Monthly Activity")
         timeline = helper.monthly_timeline(selected_user, df)
-        fig, ax = plt.subplots()
-        ax.plot(timeline['time'], timeline['message'], color='red')
-        plt.xticks(rotation='vertical')
-        st.pyplot(fig)
+        fig = px.line(timeline, x='time', y='message', title='Monthly Messages', markers=True)
+        st.plotly_chart(fig)
 
-        #daily timeline
-        st.title("Daily Timeline")
+        # Daily timeline
+        st.title("Daily Activity")
         daily_timeline = helper.daily_timeline(selected_user, df)
-        fig, ax = plt.subplots()
-        ax.plot(daily_timeline['only_date'], daily_timeline['message'], color='black')
-        plt.xticks(rotation='vertical')
-        st.pyplot(fig)
+        fig = px.line(daily_timeline, x='only_date', y='message', title='Daily Messages', markers=True)
+        st.plotly_chart(fig)
 
-        #activity map
-        st.title('Activity Map')
+        # Activity map: busiest day and month
+        st.title("Activity Overview")
         col1, col2 = st.columns(2)
-
         with col1:
-            st.header("Most Busy Day")
+            st.subheader("Busiest Day")
             busy_day = helper.week_activity_map(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.bar(busy_day.index, busy_day.values, color='red')
+            fig = plt.figure(figsize=(10, 5))
+            sns.barplot(x=busy_day.index, y=busy_day.values, palette="viridis")
             plt.xticks(rotation='vertical')
             st.pyplot(fig)
 
         with col2:
-            st.header("Most Busy Month")
+            st.subheader("Busiest Month")
             busy_month = helper.month_activity_map(selected_user, df)
-            fig, ax = plt.subplots()
-            ax.bar(busy_month.index, busy_month.values, color='orange')
+            fig = plt.figure(figsize=(10, 5))
+            sns.barplot(x=busy_month.index, y=busy_month.values, palette="inferno")
             plt.xticks(rotation='vertical')
             st.pyplot(fig)
 
-        st.title("Weekly Activity Map")
-        user_heatmap = helper.activity_heatmap(selected_user,df)
-        fig, ax = plt.subplots()
-        ax = sns.heatmap(user_heatmap)
+        # Heatmap for weekly activity
+        st.title("Weekly Activity Heatmap")
+        user_heatmap = helper.activity_heatmap(selected_user, df)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.heatmap(user_heatmap, cmap="coolwarm", ax=ax)
         st.pyplot(fig)
 
-
-        #finding the busiest user in the group(Group Level)
+        # Most busy users for group chat
         if selected_user == 'Overall':
-            st.title('Most Busy Users')
+            st.title("Most Active Users")
             x, new_df = helper.most_busy_users(df)
-            fig, ax = plt.subplots()
-
             col1, col2 = st.columns(2)
-
             with col1:
-                ax.bar(x.index, x.values, color='red')
+                st.subheader("Message Count")
+                fig = plt.figure(figsize=(10, 5))
+                sns.barplot(x=x.index, y=x.values, palette="rocket")
                 plt.xticks(rotation='vertical')
                 st.pyplot(fig)
             with col2:
+                st.subheader("Detailed Stats")
                 st.dataframe(new_df)
 
-        #WordCloud
+        # WordCloud
         st.title("Wordcloud")
-        df_wc = helper.create_wordcloud(selected_user,df)
-        fig,ax = plt.subplots()
+        df_wc = helper.create_wordcloud(selected_user, df)
+        fig, ax = plt.subplots()
         ax.imshow(df_wc)
         st.pyplot(fig)
 
-        #most_common_words
-        most_common_df = helper.most_common_words(selected_user, df)
-        # Set the font family to a Devanagari-compatible font
-        plt.rcParams['font.family'] = 'Nirmala UI'  # Or use 'Mangal', 'Lohit Devanagari', etc.
-        fig, ax = plt.subplots()
-        ax.barh(most_common_df['Word'], most_common_df['Count'], color='red')
-        plt.xticks(rotation='vertical')
+        # Most common words
         st.title("Most Common Words")
+        most_common_df = helper.most_common_words(selected_user, df)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.barplot(x=most_common_df['Count'], y=most_common_df['Word'], palette='magma')
+        plt.xticks(rotation='vertical')
         st.pyplot(fig)
-        #st.dataframe(most_common_df)
 
-        # Emoji analysis
-        emoji_df = helper.emoji_helper(selected_user, df)
+        # Emoji analysis with pie chart
         st.title("Emoji Analysis")
-
+        emoji_df = helper.emoji_helper(selected_user, df)
         col1, col2 = st.columns(2)
+        # Emoji analysis with customizable pie chart (without emoji slider)
+        st.title("Emoji Analysis")
+        col1, col2 = st.columns(2)
+
+        # Display emoji DataFrame
         with col1:
             st.dataframe(emoji_df)
 
+        # Automatically display the top emojis without using a sidebar slider
         with col2:
-            # Adjust the figure size (e.g., 8x8 inches)
-            fig, ax = plt.subplots(figsize=(15, 15))  # Increase the figure size
+            # Filter the top emojis based on a predefined threshold (e.g., top 5 emojis)
+            emoji_threshold = 5  # You can adjust this value to control how many emojis to show
+            filtered_emoji_df = emoji_df[emoji_df[1] >= emoji_threshold]  # Filter emoji data based on this threshold
 
-            # Pie chart with larger percentage labels
-            wedges, texts, autotexts = ax.pie(
-                emoji_df[1].head(),
-                labels=emoji_df[0].head(),
-                autopct="%.2f%%",
-                startangle=90,
-                textprops={'fontsize': 20},  # Increase percentage font size
-            )
+            # Check if the filtered emoji DataFrame is not empty
+            if not filtered_emoji_df.empty:
+                fig, ax = plt.subplots(figsize=(15, 15))  # Create a large pie chart
 
-            # Customize percentage label size
-            for autotext in autotexts:
-                autotext.set_fontsize(20)
+                wedges, texts, autotexts = ax.pie(
+                    filtered_emoji_df[1].head(),  # Top emojis
+                    labels=filtered_emoji_df[0].head(),
+                    autopct="%.2f%%",
+                    startangle=90,
+                    textprops={'fontsize': 20},  # Customize percentage label size
+                    colors=plt.get_cmap('tab20').colors  # Use a nice color palette
+                )
 
-            # Equal aspect ratio ensures that pie is drawn as a circle.
-            ax.axis('equal')
+                # Add a legend for better visualization
+                ax.legend(wedges, filtered_emoji_df[0].head(), title="Top Emojis", loc="center left",
+                          bbox_to_anchor=(1, 0, 0.5, 1))
+                st.pyplot(fig)
+            else:
+                st.warning("No emojis found with the selected threshold.")
 
-            # Adding a legend
-            ax.legend(wedges, emoji_df[0].head(), title="Top Emojis", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
 
-            st.pyplot(fig)
+        # Sentiment analysis
+        st.title("Sentiment Analysis")
+        df['sentiment'] = df['message'].apply(lambda msg: TextBlob(msg).sentiment.polarity)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.histplot(df['sentiment'], bins=50, kde=True, color='green')
+        plt.title("Sentiment Distribution")
+        st.pyplot(fig)
 
+        # Download chat data as CSV
+        st.sidebar.title("Download Data")
+        csv_data = df.to_csv().encode('utf-8')
+        st.sidebar.download_button(label="Download CSV", data=csv_data, file_name="chat_data.csv", mime='text/csv')
