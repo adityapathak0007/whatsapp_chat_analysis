@@ -1,6 +1,7 @@
 # WhatsApp Chat Analysis 📱
 
-[View Movie Recommender System](https://whatsappchatanalysis-5fdc65fn64oswe8ph3odpy.streamlit.app)
+[WhatsApp Chat Analysis](https://whatsappchatanalysis-5fdc65fn64oswe8ph3odpy.streamlit.app/)
+
 
 ## Overview
 
